@@ -7,6 +7,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+func CreateAndInject(ctx context.Context) context.Context {
+	logger := zap.Must(zap.NewProduction())
+	return InjectIntoContext(ctx, logger)
+}
 func InjectIntoContext(ctx context.Context, logger *zap.Logger) context.Context {
 	ctx = context.WithValue(ctx, "logger", logger)
 	return ctx
