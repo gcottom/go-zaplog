@@ -2,6 +2,7 @@ package zaplog
 
 import (
 	"context"
+	"os"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -9,9 +10,13 @@ import (
 
 func CreateAndInject(ctx context.Context) context.Context {
 	logger := zap.Must(zap.NewProduction())
+	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(zapcore.EncoderConfig{TimeKey: "ts", LevelKey: "level", NameKey: "logger", CallerKey: "caller", MessageKey: "message", StacktraceKey: "stacktrace",
+		LineEnding: zapcore.DefaultLineEnding, EncodeLevel: zapcore.CapitalLevelEncoder, EncodeDuration: zapcore.StringDurationEncoder, EncodeTime: zapcore.EpochMillisTimeEncoder, EncodeCaller: zapcore.ShortCallerEncoder}),
+		os.Stdout, zap.NewAtomicLevelAt(zap.InfoLevel)), zap.WithCaller(true), zap.AddCallerSkip(1)))
 	return InjectIntoContext(ctx, logger)
 }
 func InjectIntoContext(ctx context.Context, logger *zap.Logger) context.Context {
+	//lint:ignore SA1029 ignore
 	ctx = context.WithValue(ctx, "logger", logger)
 	return ctx
 }
